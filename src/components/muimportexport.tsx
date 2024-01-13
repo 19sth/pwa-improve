@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { updatePageState } from "../redux/slicePage";
 import { ContentCopy } from "@mui/icons-material";
 import MuTakoz from "./mutakoz";
+import { KEY_LOCALSTORAGE } from "../redux/store";
 
 export default function MuImportExport() {
   const dispatch = useDispatch();
@@ -20,7 +21,7 @@ export default function MuImportExport() {
   }, [dispatch]);
 
   useEffect(() => {
-    const localAppData = localStorage.getItem("applicationState") || "{}";
+    const localAppData = localStorage.getItem(KEY_LOCALSTORAGE) || "{}";
     setAppData(JSON.stringify(JSON.parse(localAppData), null, 2));
   }, []);
 

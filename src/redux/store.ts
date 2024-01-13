@@ -1,7 +1,8 @@
 import { Action, Dispatch, configureStore } from "@reduxjs/toolkit";
 import pageReducer from "./slicePage";
+import targetReducer from "./sliceTarget";
 
-const KEY_LOCALSTORAGE = "app-state-improve"
+export const KEY_LOCALSTORAGE = "app-state-improve"
 
 const localStorageMiddleware = ({ getState }: { getState: () => any }) => {
   return (next: Dispatch) => (action: Action) => {
@@ -20,6 +21,7 @@ const reHydrateStore = () => {
 export const store = configureStore({
   reducer: {
     page: pageReducer,
+    target: targetReducer
   },
   preloadedState: reHydrateStore(),
   middleware: (getDefaultMiddleware: any) =>
