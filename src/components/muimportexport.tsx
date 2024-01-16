@@ -5,6 +5,7 @@ import { updatePageState } from "../redux/slicePage";
 import { ContentCopy } from "@mui/icons-material";
 import MuTakoz from "./mutakoz";
 import { KEY_LOCALSTORAGE } from "../redux/store";
+import { ROUTE_PREFIX } from "../utils/constants";
 
 export default function MuImportExport() {
   const dispatch = useDispatch();
@@ -51,9 +52,9 @@ export default function MuImportExport() {
 
       <MuTakoz/>
       <Button className="w-full" variant="contained" onClick={()=>{
-        localStorage.setItem("applicationState", appData);
+        localStorage.setItem(KEY_LOCALSTORAGE, appData);
         sessionStorage.clear()
-        window.location.href = "/pwa-progress"
+        window.location.href = ROUTE_PREFIX
       }}>
         Save
       </Button>

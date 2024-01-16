@@ -110,11 +110,13 @@ export default function Add() {
           dispatch(
             addNewTarget({
               id: -1,
-              name,
+              name: name.toUpperCase(),
               startDate,
               initialValue,
               targetValue,
               records: [],
+              endDate: new Date("1970-01-01").toISOString(),
+              targetReached: false
             })
           );
           navigate(-1);

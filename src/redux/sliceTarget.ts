@@ -15,6 +15,8 @@ export interface ITargetItem {
   id: number
   name: string
   startDate: string
+  endDate: string
+  targetReached: boolean
   initialValue: number
   targetValue: number
   records: ITargetRecord[]
