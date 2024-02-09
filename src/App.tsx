@@ -6,6 +6,7 @@ import MuImportExport from './components/muimportexport';
 import Add from './pages/add';
 import { ROUTE_PREFIX } from './utils/constants';
 import Detail from './pages/detail';
+import AddRecord from './pages/addRecord';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="importexport" element={<MuImportExport />} />
           <Route path="add" element={<Add />} />
           <Route path="detail/:id" element={<Detail />} />
+          <Route path="add-record/:id" element={<AddRecord />} />
         </Route>
       </Routes>
     </BrowserRouter>
