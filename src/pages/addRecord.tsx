@@ -62,6 +62,7 @@ export default function AddRecord() {
             }
           })
         )
+        navigate(-1);
       }}>
         ADD NEW RECORD
       </Button>
