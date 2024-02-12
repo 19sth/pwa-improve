@@ -3,15 +3,60 @@ import { useDispatch, useSelector } from "react-redux";
 import { updatePageState } from "../redux/slicePage";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../redux/store";
-import { ITargetItem } from "../redux/sliceTarget";
-import { ChartContainer, ChartsReferenceLine, ChartsXAxis, ChartsYAxis, LineChart, LineHighlightPlot, LinePlot, MarkPlot } from "@mui/x-charts";
+import { ITargetItem, ITargetRecord } from "../redux/sliceTarget";
+import {
+  ChartContainer,
+  ChartsLegend,
+  ChartsReferenceLine,
+  ChartsXAxis,
+  ChartsYAxis,
+  LineChart,
+  LineHighlightPlot,
+  LinePlot,
+  MarkPlot,
+} from "@mui/x-charts";
 import { linearRegression, linearRegressionLine } from "simple-statistics";
-import { format } from "date-fns";
+import { eachDayOfInterval, format, max } from "date-fns";
+import MuTakoz from "../components/mutakoz";
 
 interface IChartData {
   date: Date;
   actual: number;
   regression: number;
+}
+
+function interpolateRecords(records: ITargetRecord[]) {
+  const dayInterval = eachDayOfInterval({
+    start: new Date(records[0].date),
+    end: max([
+      new Date(
+        records[records.length - 1].date
+      ),
+      new Date()
+    ]),
+  }).map(e=>e.toISOString());
+
+  const newRecords = [];
+  let i = 0;
+  let j = 0;
+  while (j < dayInterval.length) {
+    if (dayInterval[j] >= records[i].date) {
+      newRecords.push({
+        date: dayInterval[j],
+        value: records[i].value
+      } as ITargetRecord)
+      i = (Math.min(i+1, records.length-1));
+      j++;
+    } else if (dayInterval[j] < records[i].date) {
+      newRecords.push({
+        date: dayInterval[j],
+        value: records[i-1].value
+      } as ITargetRecord)
+      j++;
+    }
+  }
+
+  return newRecords;
 }
 
 export default function Detail() {
@@ -44,10 +89,12 @@ export default function Detail() {
       const localTarget = targets.filter((e) => e.id === Number.parseInt(id));
       if (localTarget.length > 0) {
         setThisTarget(localTarget[0] as ITargetItem);
+        const localRecords = interpolateRecords(localTarget[0].records);
+
         const regg = linearRegression(
-          localTarget[0].records.map((e, ix) => [ix, e.value])
+          localRecords.map((e, ix) => [ix, e.value])
         );
-        const localChartData = localTarget[0].records.map(
+        const localChartData = localRecords.map(
           (e, ix) =>
             ({
               date: new Date(e.date),
@@ -63,21 +110,23 @@ export default function Detail() {
   }, [id, navigate, targets]);
 
   if (!thisTarget.targetValue) {
-    return (<></>)
+    return <></>;
   }
 
   return (
     <div>
-      <div className="text-2xl font-light">
-       task &nbsp;
-       <span className="font-bold">
-        {thisTarget.name}
-       </span>
-      </div>
       <ChartContainer
         series={[
-          { type: "line", label:"Actual", data: chartData.map((e) => e.actual) },
-          { type: "line", label:"Prediction", data: chartData.map((e) => e.regression) },
+          {
+            type: "line",
+            label: "Actual",
+            data: chartData.map((e) => e.actual),
+          },
+          {
+            type: "line",
+            label: "Prediction",
+            data: chartData.map((e) => e.regression),
+          },
           {
             type: "line",
             data: chartData.map((e) => thisTarget.targetValue),
@@ -86,23 +135,28 @@ export default function Detail() {
         xAxis={[
           {
             scaleType: "point",
-            data: chartData.map(
-              (e) => format(e.date, "LLL d")
-            ),
+            data: chartData.map((e) => format(e.date, "LLL d")),
           },
         ]}
         width={520}
         height={250}
       >
+        <LinePlot />
 
-      <LinePlot/>
-
-      
-      <ChartsXAxis />
-      <ChartsYAxis />
-      <ChartsReferenceLine y={thisTarget.targetValue} label="Target" lineStyle={{ stroke: 'red' }} />
-
+        <ChartsXAxis />
+        <ChartsYAxis />
+        <ChartsLegend/>
+        <ChartsReferenceLine
+          y={thisTarget.targetValue}
+          label="Target"
+          lineStyle={{ stroke: "red" }}
+        />
       </ChartContainer>
+      <MuTakoz/>
+      <div className="text-2xl font-light">
+        task &nbsp;
+        <span className="font-bold">{thisTarget.name}</span>
+      </div>
     </div>
   );
 }
