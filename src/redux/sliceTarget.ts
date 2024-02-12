@@ -6,6 +6,19 @@ export interface ITargetRecord {
   value: number
 }
 
+function removeRecordsByDate(records: ITargetRecord[], date: string) {
+  let ixToRemove = [] as number[];
+  records.forEach((e,ix) => {
+    if (e.date === date) {
+      ixToRemove.push(ix);
+    }
+  });
+  ixToRemove = ixToRemove.reverse()
+  ixToRemove.forEach(e=>{
+    records.splice(e,1)
+  })
+}
+
 export interface IAddTargetRecord {
   id: number
   record: ITargetRecord
@@ -49,6 +62,11 @@ export const targetSlice = createSlice({
           const records = state.targets[i].records;
           records.push(action.payload.record);
           records.sort((a,b)=>(a.date > b.date)?1:-1);
+          
+          if (Number.isNaN(action.payload.record.value)) {
+            removeRecordsByDate(records, action.payload.record.date);
+          }
+
           state.targets[i].records = records;
         }
       }
