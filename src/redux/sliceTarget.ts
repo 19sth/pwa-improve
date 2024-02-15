@@ -54,12 +54,23 @@ export const targetSlice = createSlice({
         newId = state.targets[state.targets.length-1].id + 1
       }
       newTarget.id = newId;
+      newTarget.records = [
+        {
+          date: newTarget.startDate,
+          value: newTarget.initialValue
+        }
+      ]
       state.targets.push(newTarget);
     },
     addNewRecord: (state, action: PayloadAction<IAddTargetRecord>) => {
-      for (let i = 0; i < state.targets.length; i++) {
-        if (state.targets[i].id === action.payload.id) {
-          const records = state.targets[i].records;
+      for (const element of state.targets) {
+        if (element.id === action.payload.id) {
+          if (action.payload.record.date.localeCompare(element.startDate) < 0) {
+            alert(`Record should be located after start date ${element.startDate}`)
+            return
+          }
+
+          const records = element.records;
           records.push(action.payload.record);
           records.sort((a,b)=>(a.date > b.date)?1:-1);
           
@@ -67,7 +78,8 @@ export const targetSlice = createSlice({
             removeRecordsByDate(records, action.payload.record.date);
           }
 
-          state.targets[i].records = records;
+          element.records = records;
+          break;
         }
       }
     }
