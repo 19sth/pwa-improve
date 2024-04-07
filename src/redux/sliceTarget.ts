@@ -71,12 +71,12 @@ export const targetSlice = createSlice({
           }
 
           const records = element.records;
-          records.push(action.payload.record);
-          records.sort((a,b)=>(a.date > b.date)?1:-1);
-          
-          if (Number.isNaN(action.payload.record.value)) {
-            removeRecordsByDate(records, action.payload.record.date);
+          removeRecordsByDate(records, action.payload.record.date);
+          if (!Number.isNaN(action.payload.record.value)) {
+            records.push(action.payload.record);
           }
+          records.sort((a,b)=>(a.date > b.date)?1:-1);
+
 
           element.records = records;
           break;

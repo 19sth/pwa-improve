@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { updatePageState } from "../redux/slicePage";
-import { Button, FormControl, InputLabel, TextField } from "@mui/material";
+import { Button, FormControl, TextField } from "@mui/material";
 import MuTakoz from "../components/mutakoz";
-import { addDays, parseISO, startOfDay } from "date-fns";
-import { addNewRecord, addNewTarget } from "../redux/sliceTarget";
+import { parseISO, startOfDay } from "date-fns";
+import { addNewRecord } from "../redux/sliceTarget";
 import { useNavigate, useParams } from "react-router-dom";
 import { DatePicker } from "@mui/x-date-pickers";
 
@@ -30,7 +30,7 @@ export default function AddRecord() {
 
       <FormControl fullWidth>
         <DatePicker
-          label="Controlled picker"
+          label="Record Date"
           value={parseISO(date)}
           onChange={(newDate) =>
             setDate(startOfDay(newDate || 0).toISOString() || "")
@@ -41,7 +41,7 @@ export default function AddRecord() {
       <MuTakoz />
 
       <TextField
-        label="Initial"
+        label="Value"
         variant="outlined"
         className="w-full"
         type="number"

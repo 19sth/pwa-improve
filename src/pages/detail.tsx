@@ -46,8 +46,8 @@ export default function Detail() {
       updatePageState({
         navItems: [
           {
-            icon: "Add",
-            link: `./add-record/${thisTarget.id}`,
+            icon: "List",
+            link: `./records/${thisTarget.id}`,
           },
           {
             icon: "Delete",
@@ -142,25 +142,6 @@ export default function Detail() {
           <div className="font-bold text-right col-span-2"> {e.value} </div>
         </div>
       ))}
-
-      <div className="px-6">
-        <div className="text-lg mt-5">Records</div>
-        <div
-          className="rounded-lg border border-1 px-5"
-          style={{ height: 200, overflowY: "auto" }}
-        >
-          {thisTarget.records.map((e) => (
-            <div key={e.date} className="grid grid-cols-5 gap-1 border-b-4 mt-3">
-              <div className="col-span-4">
-                {format(new Date(e.date), "MMMM do, Y, EEEE")}
-              </div>
-              <div className="col-span-1 text-center">
-                {e.value}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

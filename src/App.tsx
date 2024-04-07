@@ -7,6 +7,7 @@ import Add from './pages/add';
 import { ROUTE_PREFIX } from './utils/constants';
 import Detail from './pages/detail';
 import AddRecord from './pages/addRecord';
+import Records from './pages/records';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="add" element={<Add />} />
           <Route path="detail/:id" element={<Detail />} />
           <Route path="add-record/:id" element={<AddRecord />} />
+          <Route path="records/:id" element={<Records />} />
         </Route>
       </Routes>
     </BrowserRouter>
