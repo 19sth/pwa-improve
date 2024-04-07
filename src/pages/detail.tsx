@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updatePageState } from "../redux/slicePage";
+import { IModal, updateModal, updatePageState } from "../redux/slicePage";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../redux/store";
-import { ITargetItem, ITargetRecord } from "../redux/sliceTarget";
+import { ITargetItem, ITargetRecord, deleteTarget } from "../redux/sliceTarget";
 import {
   ChartContainer,
   ChartsLegend,
@@ -49,6 +49,23 @@ export default function Detail() {
             icon: "Add",
             link: `./add-record/${thisTarget.id}`,
           },
+          {
+            icon: "Delete",
+            func: ()=>{
+              dispatch(updateModal({
+                show: true,
+                title: "Deleting Target",
+                text: `Do you really want to delete target [${thisTarget.name}]?`,
+                buttons: [
+                  {label: "Delete", func: ()=>{
+                    dispatch(deleteTarget(thisTarget.id));
+                    dispatch(updateModal({show: false} as IModal));
+                    navigate(-1);
+                  }}
+                ]
+              }))
+            }
+          }
         ],
         title: "Add",
       })

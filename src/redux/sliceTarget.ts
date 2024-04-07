@@ -82,10 +82,21 @@ export const targetSlice = createSlice({
           break;
         }
       }
+    },
+    deleteTarget: (state, action: PayloadAction<number>) => {
+      let targets = [...state.targets]
+      for (let i=0; i < targets.length; i++) {
+        const element = state.targets[i];
+        if (element.id === action.payload) {
+          targets.splice(i,1);
+          break;
+        }
+      }
+      state.targets = targets;
     }
   },
 });
 
-export const { addNewTarget, addNewRecord } = targetSlice.actions;
+export const { addNewTarget, addNewRecord, deleteTarget } = targetSlice.actions;
 
 export default targetSlice.reducer;
