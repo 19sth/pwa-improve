@@ -189,32 +189,50 @@ function prepareChartData(
   );
 }
 
-function getClosestValueLastDays(
+function getRecentPerformance(
   interpolatedRecords: ITargetRecord[],
   targetValue: number,
   days = 3
 ) {
   const endDate = new Date();
   const startDate = subDays(endDate, days - 1);
-  const candidates = interpolatedRecords.filter((record) => {
-    const recordDate = new Date(record.date);
-    return recordDate >= startDate && recordDate <= endDate;
-  });
 
-  if (candidates.length === 0) {
+  const historicalCandidates = interpolatedRecords
+    .map((record) => ({
+      date: new Date(record.date),
+      diff: Math.abs(record.value - targetValue),
+    }))
+    .filter((item) => item.date < startDate);
+
+  if (historicalCandidates.length === 0) {
+    return { status: "not-available", delta: null };
+  }
+
+  const allTimeBest = historicalCandidates.reduce(
+    (bestSoFar, item) => (item.diff < bestSoFar.diff ? item : bestSoFar),
+    historicalCandidates[0]
+  ).diff;
+
+  const recentCandidates = interpolatedRecords
+    .map((record) => ({
+      date: new Date(record.date),
+      diff: Math.abs(record.value - targetValue),
+    }))
+    .filter((item) => item.date >= startDate && item.date <= endDate);
+
+  if (recentCandidates.length === 0) {
     return null;
   }
 
-  return candidates.reduce(
-    (best, record) => {
-      const diff = Math.abs(record.value - targetValue);
-      if (!best || diff < best.diff) {
-        return { record, diff };
-      }
-      return best;
-    },
-    null as { record: ITargetRecord; diff: number } | null
-  );
+  const recentBest = recentCandidates.reduce(
+    (bestSoFar, item) => (item.diff < bestSoFar.diff ? item : bestSoFar),
+    recentCandidates[0]
+  ).diff;
+
+  return {
+    status: recentBest < allTimeBest ? "Safe" : "Risk",
+    delta: recentBest,
+  };
 }
 
 function prepareAnalyticsData(
@@ -256,17 +274,24 @@ function prepareAnalyticsData(
   }
 
   const RECENT_DAY_COUNT = 3;
-  const closest = getClosestValueLastDays(
+  const recentPerformance = getRecentPerformance(
     interpolatedRecords,
     target.targetValue,
     RECENT_DAY_COUNT
   );
 
+  let recentStatus = "No recent data";
+  if (recentPerformance) {
+    if (recentPerformance.delta === null) {
+      recentStatus = "not-available";
+    } else {
+      recentStatus = `${recentPerformance.status} (Δ${recentPerformance.delta.toFixed(2)})`;
+    }
+  }
+
   detailInfo.push({
-    label: `Closest in ${RECENT_DAY_COUNT} days`,
-    value: closest
-      ? `${closest.record.value} (Δ${closest.diff})`
-      : "No recent data",
+    label: `3-day status`,
+    value: recentStatus,
   });
 
   return detailInfo;
