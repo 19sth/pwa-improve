@@ -13,7 +13,7 @@ import {
   LinePlot,
 } from "@mui/x-charts";
 import { linearRegression, linearRegressionLine } from "simple-statistics";
-import { differenceInDays, eachDayOfInterval, format, max } from "date-fns";
+import { differenceInDays, eachDayOfInterval, format, max, subDays } from "date-fns";
 import MuTakoz from "../components/mutakoz";
 
 interface IChartData {
@@ -81,7 +81,7 @@ export default function Detail() {
         const regg = linearRegression(
           localRecords.map((e, ix) => [ix, e.value])
         );
-        setAnalyticsData(prepareAnalyticsData(localTarget[0], regg));
+        setAnalyticsData(prepareAnalyticsData(localTarget[0], regg, localRecords));
         setChartData(prepareChartData(localRecords, regg));
       } else {
         navigate(-1);
@@ -189,7 +189,39 @@ function prepareChartData(
   );
 }
 
-function prepareAnalyticsData(target: ITargetItem, regg: IReggLine) {
+function getClosestValueLastDays(
+  interpolatedRecords: ITargetRecord[],
+  targetValue: number,
+  days = 3
+) {
+  const endDate = new Date();
+  const startDate = subDays(endDate, days - 1);
+  const candidates = interpolatedRecords.filter((record) => {
+    const recordDate = new Date(record.date);
+    return recordDate >= startDate && recordDate <= endDate;
+  });
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  return candidates.reduce(
+    (best, record) => {
+      const diff = Math.abs(record.value - targetValue);
+      if (!best || diff < best.diff) {
+        return { record, diff };
+      }
+      return best;
+    },
+    null as { record: ITargetRecord; diff: number } | null
+  );
+}
+
+function prepareAnalyticsData(
+  target: ITargetItem,
+  regg: IReggLine,
+  interpolatedRecords: ITargetRecord[]
+) {
   const startDate = new Date(target.startDate);
   const daysPassed = Math.floor(differenceInDays(new Date(), startDate));
 
@@ -222,6 +254,20 @@ function prepareAnalyticsData(target: ITargetItem, regg: IReggLine) {
       value: "Not possible",
     });
   }
+
+  const RECENT_DAY_COUNT = 3;
+  const closest = getClosestValueLastDays(
+    interpolatedRecords,
+    target.targetValue,
+    RECENT_DAY_COUNT
+  );
+
+  detailInfo.push({
+    label: `Closest in ${RECENT_DAY_COUNT} days`,
+    value: closest
+      ? `${closest.record.value} (Δ${closest.diff})`
+      : "No recent data",
+  });
 
   return detailInfo;
 }
